@@ -69,6 +69,7 @@ import com.twitter.hbc.core.endpoint.StreamingEndpoint;
 import com.twitter.hbc.core.event.Event;
 import com.twitter.hbc.core.processor.StringDelimitedProcessor;
 import com.twitter.hbc.httpclient.auth.Authentication;
+import com.twitter.hbc.httpclient.auth.BasicAuth;
 import com.twitter.hbc.httpclient.auth.OAuth1;
 
 @SupportsBatching
@@ -151,9 +152,19 @@ public class GetTwitterWithProxy extends AbstractProcessor {
 			.required(false)
 			.addValidator(StandardValidators.NON_EMPTY_VALIDATOR).build();
 	public static final PropertyDescriptor PROXY_PORT = new PropertyDescriptor.Builder()
-			.name("Proxy Port").description("The port of the proxy server")
-			.required(false).addValidator(StandardValidators.PORT_VALIDATOR)
-			.build();
+                .name("Proxy Port").description("The port of the proxy server")
+                .required(false).addValidator(StandardValidators.PORT_VALIDATOR)
+                .build();
+
+	public static final PropertyDescriptor PROXY_USER = new PropertyDescriptor.Builder()
+                .name("Proxy Username").description("The username for the proxy server")
+                .required(false)
+                .build();
+
+	public static final PropertyDescriptor PROXY_PASS = new PropertyDescriptor.Builder()
+                .name("Proxy Password").description("The password for the proxy server")
+                .required(false)
+                .build();
 
 	public static final Relationship REL_SUCCESS = new Relationship.Builder()
 			.name("success")
@@ -183,8 +194,10 @@ public class GetTwitterWithProxy extends AbstractProcessor {
 		descriptors.add(TERMS);
 		descriptors.add(FOLLOWING);
 		descriptors.add(LOCATIONS);
-		descriptors.add(PROXY_HOST);
-		descriptors.add(PROXY_PORT);
+                descriptors.add(PROXY_HOST);
+                descriptors.add(PROXY_PORT);
+                descriptors.add(PROXY_USER);
+                descriptors.add(PROXY_PASS);
 
 		this.descriptors = Collections.unmodifiableList(descriptors);
 
@@ -263,7 +276,9 @@ public class GetTwitterWithProxy extends AbstractProcessor {
 		final ClientBuilder clientBuilder = new ClientBuilder();
 
 		final String proxyHost = context.getProperty(PROXY_HOST).getValue();
-		final Integer proxyPort = context.getProperty(PROXY_PORT).asInteger();
+                final Integer proxyPort = context.getProperty(PROXY_PORT).asInteger();
+                final String proxyUser = context.getProperty(PROXY_USER).getValue();
+                final String proxyPass = context.getProperty(PROXY_PASS).getValue();
 
 		clientBuilder.name("GetTwitter[id=" + getIdentifier() + "]")
 				.authentication(oauth).eventMessageQueue(eventQueue)
@@ -271,6 +286,9 @@ public class GetTwitterWithProxy extends AbstractProcessor {
 
 		if (!proxyHost.isEmpty()) {
 			clientBuilder.proxy(proxyHost, proxyPort);
+		}
+		if (!proxyUser.isEmpty()) {
+		    clientBuilder.authentication(new BasicAuth(proxyUser, proxyPass));
 		}
 
 		final String languageString = context.getProperty(LANGUAGES).getValue();
