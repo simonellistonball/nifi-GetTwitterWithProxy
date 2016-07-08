@@ -5,7 +5,7 @@ Interim version of the Nifi GetTwitter processor with support for proxy settings
 
 The build relies on a branch of the twitter bird client, which supports proxy and proxy authentication. See: https://github.com/simonellistonball/hbc/tree/AddProxyBasicAuth
 
-To build this, first grab the branch at https://github.com/kutsal/hbc/tree/http-proxy-support and
+To build this, first grab the branch at https://github.com/simonellistonball/hbc/tree/AddProxyBasicAuth and
 
     mvn install
 
